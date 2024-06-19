@@ -4,7 +4,6 @@ from django.urls import reverse
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
-# Create your models here.
 
 class Category(models.Model):
     name = models.CharField(unique=True,max_length=255)
