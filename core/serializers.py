@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Category, Comment, Post, LikedItem
 from django.contrib.auth import get_user_model
+from users.serializers import UserSerializer
 
 User = get_user_model()
 
@@ -30,6 +31,12 @@ class PostSerializer(serializers.ModelSerializer):
                 'read_only': True
             },
         }
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['author'] = UserSerializer(
+            instance.author, many=False).data
+        return representation
+
 
 
 class CommentSerializer(serializers.ModelSerializer):

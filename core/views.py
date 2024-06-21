@@ -2,6 +2,7 @@ from rest_framework import viewsets
 from.models import Post, Category, LikedItem, Comment
 from.serializers import PostSerializer, CategorySerializer, LikedItemSerializer, CommentSerializer
 from.permissions import IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -12,7 +13,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]  # General read/write access control
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_permissions(self):
         if self.request.method in ['PUT', 'PATCH', 'DELETE']:
@@ -31,6 +32,12 @@ class PostViewSet(viewsets.ModelViewSet):
         
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.author.id!= request.user.id:
+            raise PermissionDenied("Only the author can update this post.")
+        return super().update(request, *args, **kwargs)
 
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
